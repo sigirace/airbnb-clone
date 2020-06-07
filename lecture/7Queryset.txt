@@ -1,0 +1,57 @@
+7. QuerySet
+
+#7.0
+
+foreignkey는 선택형으로 고를 수 있고
+
+many to many가 어떻게 foreignkey 처럼 보일 수 있을까?
+
+장고와 소통하고싶으면?
+python manage.py shell
+from users.models import User
+
+vars는 __dict___, dictionory 또는 class list안의 나타내는 것을 return
+dir는 class 안의 names list를 return
+
+User.objects
+-> UserManager를 가져옴 이는 db에서 elements를 가져오게 하는 것
+-> python을 이용해서 sql를 사용하지 않고
+
+User.objects.all()
+=> QuerySet[<>,<>…]
+	- queryset은 object list를 return
+
+all_user = User.objects.all()
+all_user.filter(superhost=True)
+=> QuerySet[<>, <>…]
+
+kangsik = User.objects.get(username=“kangsik”)
+print(kangsik)
+=> kangsik
+
+kangsik.room_set
+=> ~~.create_reverse_many_to_one_manager
+	-> 만약 foreign key를 element로 가르키면 그 element또한 foreign key로 접근 할 수 있다.
+	-> _set은 element가 foreign key에 접근할 수 있는 방법
+
+kangsik.room_set.all()
+=> kangsik이 생성한 room을 QuerySet형식의 object로 return
+
+#7.1
+rooms -> models.py의 host에 추가
+related_name=“rooms”
+	- kangsik.rooms.all()
+	- 이제 rooms가 room_set과 같은 역할을 함
+
+[many to many]
+from rooms.models import Room
+room = Room.objects.get(id=1)
+	(= Room.objects.get(pk=1)) django에서 id랑 pk는 동의어라고 생각해
+startswith = User.objects.filter(startswith=“go”)
+	- startswith은 Like 같은 기능이다.
+
+!! admin에는 Class들이 연결되어있고 이는 object로 함수에 들어감 
+	-> object는 element가되고 미리 설정한 related_name을 통해 foriegn key에 접근
+	-> related_name은 다른 클래스에서 같은 이름으로 접근하면 오류날것같다 주의하자
+
+
