@@ -22,7 +22,6 @@ class RoomType(AbstractItem):
 
     class Meta:
         verbose_name = "Room Type"
-        ordering = ["created"]
 
 
 class Amenity(AbstractItem):
@@ -36,6 +35,8 @@ class Amenity(AbstractItem):
 class Facility(AbstractItem):
 
     """ Facility Model Definition """
+
+    pass
 
     class Meta:
         verbose_name_plural = "Facilities"
@@ -60,9 +61,6 @@ class Photo(core_models.TimeStampedModel):
     def __str__(self):
         return self.caption
 
-    class Meta:
-        verbose_name = "Photo"
-
 
 class Room(core_models.TimeStampedModel):
 
@@ -74,12 +72,12 @@ class Room(core_models.TimeStampedModel):
     city = models.CharField(max_length=80)
     price = models.IntegerField()
     address = models.CharField(max_length=140)
-    beds = models.IntegerField(default=0)
-    bedrooms = models.IntegerField(default=0)
-    baths = models.IntegerField(default=0)
-    guests = models.IntegerField(default=0)
-    check_in = models.TimeField(default=0)
-    check_out = models.TimeField(default=0)
+    guests = models.IntegerField()
+    beds = models.IntegerField()
+    bedrooms = models.IntegerField()
+    baths = models.IntegerField()
+    check_in = models.TimeField()
+    check_out = models.TimeField()
     instant_book = models.BooleanField(default=False)
     host = models.ForeignKey(
         "users.User", related_name="rooms", on_delete=models.CASCADE
@@ -91,22 +89,18 @@ class Room(core_models.TimeStampedModel):
     facilities = models.ManyToManyField("Facility", related_name="rooms", blank=True)
     house_rules = models.ManyToManyField("HouseRule", related_name="rooms", blank=True)
 
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
         self.city = str.capitalize(self.city)
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.name
-
     def total_rating(self):
         all_reviews = self.reviews.all()
-
-        length = len(all_reviews)
-
-        if length == 0:
-            length = 1
-
         all_ratings = 0
-        for review in all_reviews:
-            all_ratings += review.rating_average()
-        return all_ratings / length
+        if len(all_reviews) > 0:
+            for review in all_reviews:
+                all_ratings += review.rating_average()
+            return round(all_ratings / len(all_reviews), 2)
+        return 0
